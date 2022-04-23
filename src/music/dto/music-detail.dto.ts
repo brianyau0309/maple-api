@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsUUID } from 'class-validator';
 
-export default class MusicDetailDto {
+export class MusicDetailDto {
   @IsUUID()
   @ApiProperty()
   musicId: string;

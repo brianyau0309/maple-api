@@ -1,6 +1,6 @@
 import { IAudioMetadata, IPicture } from 'music-metadata';
 import { basename, extname } from 'path';
-import { Music } from '../schemas/music.schema';
+import { Music, MusicDocument } from '../schemas/music.schema';
 import { MusicCover } from '../schemas/music-cover.schema';
 import { resizeCover } from './image-process';
 
@@ -36,4 +36,23 @@ export const musicFromMetadata = async (
   sampleRate: metadata.format.sampleRate,
   duration: metadata.format.duration,
   bitrate: metadata.format.bitrate,
+});
+
+export const musicFromDoc = (doc: MusicDocument): Music => ({
+  musicId: doc.musicId,
+  path: doc.path,
+  filename: doc.filename,
+  ext: doc.ext,
+  title: doc.title,
+  artist: doc.artist,
+  album: doc.album,
+  covers: doc.covers,
+  container: doc.container,
+  codec: doc.codec,
+  lossless: doc.lossless,
+  numberOfChannels: doc.numberOfChannels,
+  bitsPerSample: doc.bitsPerSample,
+  sampleRate: doc.sampleRate,
+  duration: doc.duration,
+  bitrate: doc.bitrate,
 });

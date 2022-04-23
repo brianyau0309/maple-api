@@ -2,6 +2,7 @@
 .git
 .gitignore
 .dockerignore
+.husky
 
 # Build dependencies
 dist

@@ -6,7 +6,7 @@ import { PromisePool } from '@supercharge/promise-pool';
 import { parseFile } from 'music-metadata';
 import { v4 as uuidv4 } from 'uuid';
 import { staticFolderName } from '@/constants';
-import { Music } from './schemas/music.schema';
+import { Music, MusicDocument } from './schemas/music.schema';
 import { MusicModule } from './music.module';
 import { scan } from './helpers/get-files-in-dir';
 import { musicFromMetadata } from './helpers/music-factory';
@@ -22,21 +22,21 @@ export class MusicService {
     limit: number,
     skip: number,
   ) {
-    const allMusic = await this.musicModal
+    const musicDocs = await this.musicModal
       .find(userFilterQuery)
       .limit(limit)
       .skip(skip);
     const total = await this.musicModal.count();
     return {
-      music: allMusic,
+      musicDocs,
       meta: { limit, skip, total },
     };
   }
 
-  async findOne(userFilterQuery: FilterQuery<Music>) {
-    const music = await this.musicModal.findOne(userFilterQuery);
-    if (!music) throw new NotFoundException();
-    return music;
+  async findOne(userFilterQuery: FilterQuery<Music>): Promise<MusicDocument> {
+    const musicDoc = await this.musicModal.findOne(userFilterQuery);
+    if (!musicDoc) throw new NotFoundException();
+    return musicDoc;
   }
 
   async clean(filesName?: string[], allMusic?: Music[]) {
@@ -87,7 +87,7 @@ export class MusicService {
     return { ok: 1, upserted: [] };
   }
 
-  async bulkDelete(paths: string[]) {
-    return await this.musicModal.deleteMany({ path: { $in: paths } });
+  bulkDelete(paths: string[]) {
+    return this.musicModal.deleteMany({ path: { $in: paths } });
   }
 }
