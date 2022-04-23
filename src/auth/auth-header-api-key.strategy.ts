@@ -15,7 +15,7 @@ export class HeaderApiKeyStrategy extends PassportStrategy(
   }
 
   public validate = (apiKey: string, done: (error: Error, data) => any) => {
-    const apiKeys = this.configService.get<string>('API_KEY').split(',');
+    const apiKeys = this.configService.get<string>('API_KEY')?.split(',') ?? [];
     if (apiKeys.includes(apiKey)) done(null, true);
     done(new UnauthorizedException(), null);
   };
