@@ -34,12 +34,12 @@ import { Music } from './schemas/music.schema';
 @ApiTags('Music')
 @ApiHeader({ name: 'x-api-key', required: true })
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+@UseGuards(AuthGuard('api-key'))
 @Controller({ path: 'music', version: '1' })
 export class MusicController {
   constructor(private readonly musicService: MusicService) {}
 
   @Get()
-  @UseGuards(AuthGuard('api-key'))
   @ApiOperation({ summary: 'Music list' })
   @ApiOkResponse({ description: 'List of music', type: MusicListResponse })
   @ApiBadRequestResponse({ description: 'Invalid input' })

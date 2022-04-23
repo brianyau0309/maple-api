@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, FilterQuery } from 'mongoose';
 import { join } from 'path';
@@ -72,7 +72,7 @@ export class MusicService {
           },
         };
       } catch (e) {
-        Logger.log(e);
+        // Logger.log(e);
         return null;
       }
     };
