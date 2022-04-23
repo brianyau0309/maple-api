@@ -1,14 +1,15 @@
-import { parseFile } from 'music-metadata';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, FilterQuery } from 'mongoose';
+import { join } from 'path';
+import { PromisePool } from '@supercharge/promise-pool';
+import { parseFile } from 'music-metadata';
 import { v4 as uuidv4 } from 'uuid';
+import { staticFolderName } from '@/constants';
 import { Music } from './schemas/music.schema';
 import { MusicModule } from './music.module';
 import { scan } from './helpers/get-files-in-dir';
-import { staticFolderName } from './../constants/index';
-import { musicDtoFromMetadata } from './helpers/dto-from-metadata';
-import { PromisePool } from '@supercharge/promise-pool';
+import { musicFromMetadata } from './helpers/music-factory';
 
 @Injectable()
 export class MusicService {
@@ -16,7 +17,11 @@ export class MusicService {
     @InjectModel(Music.name) private musicModal: Model<MusicModule>,
   ) {}
 
-  async findAll(userFilterQuery: FilterQuery<Music>, limit = 10, skip = 0) {
+  async findAll(
+    userFilterQuery: FilterQuery<Music>,
+    limit: number,
+    skip: number,
+  ) {
     const allMusic = await this.musicModal
       .find(userFilterQuery)
       .limit(limit)
@@ -35,19 +40,19 @@ export class MusicService {
   }
 
   async clean(filesName?: string[], allMusic?: Music[]) {
-    if (!filesName) filesName = await scan(staticFolderName);
+    if (!filesName) filesName = await scan(join(staticFolderName));
     if (!allMusic) allMusic = await this.musicModal.find({}, { path: 1 });
-    const shouldRemove = allMusic.reduce(
+    const shouldDelete = allMusic.reduce(
       (arr, cur) => (filesName.includes(cur.path) ? arr : [...arr, cur.path]),
       [],
     );
 
-    const bulkRemoveState = await this.bulkRemove(shouldRemove);
-    return { bulkRemoveState, shouldRemove };
+    const bulkDeleteState = await this.bulkDelete(shouldDelete);
+    return { bulkDeleteState, deleted: shouldDelete };
   }
 
   async sync(method: string) {
-    const paths = await scan(staticFolderName);
+    const paths = await scan(join(staticFolderName));
     const allMusic: Music[] = await this.musicModal.find({}, { path: 1 });
     await this.clean(paths);
     const dbPaths = allMusic.map(({ path }) => path);
@@ -55,12 +60,10 @@ export class MusicService {
       method === 'reload'
         ? paths
         : paths.filter((path) => !dbPaths.includes(path));
-
-    const concurrency = 100;
     const formOperation = async (path: string) => {
       try {
-        const metadata = await parseFile(path);
-        const dto = await musicDtoFromMetadata(path, metadata);
+        const metadata = await parseFile(join(process.cwd(), path));
+        const dto = await musicFromMetadata(path, metadata);
         return {
           updateOne: {
             filter: { path },
@@ -69,22 +72,22 @@ export class MusicService {
           },
         };
       } catch (e) {
+        Logger.log(e);
         return null;
       }
     };
-    const { results } = await PromisePool.withConcurrency(concurrency)
+    const { results: operations } = await PromisePool.withConcurrency(100)
       .for(upsertPaths)
       .process(formOperation);
-
-    const operations = results.filter((exist) => exist);
-    if (operations.length > 0) {
-      const upsertState = await this.musicModal.bulkWrite(operations);
+    const validOperations = operations.filter((exist) => exist);
+    if (validOperations.length > 0) {
+      const upsertState = await this.musicModal.bulkWrite(validOperations);
       return upsertState;
     }
-    return { OK: 1, update: 0 };
+    return { ok: 1, upserted: [] };
   }
 
-  async bulkRemove(paths: string[]) {
+  async bulkDelete(paths: string[]) {
     return await this.musicModal.deleteMany({ path: { $in: paths } });
   }
 }

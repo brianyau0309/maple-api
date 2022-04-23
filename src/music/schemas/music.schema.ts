@@ -7,7 +7,7 @@ export type MusicCoverDocument = MusicCover & Document;
 @Schema()
 export class Music {
   @Prop({ unique: true })
-  musicId: string;
+  musicId?: string;
 
   @Prop({ unique: true, required: true })
   path: string;
@@ -16,43 +16,43 @@ export class Music {
   filename: string;
 
   @Prop()
-  ext: string;
+  ext?: string;
 
   @Prop({ required: true, default: 'untitled' })
-  title: string;
+  title?: string;
 
   @Prop()
-  artist: string;
+  artist?: string;
 
   @Prop()
-  album: string;
+  album?: string;
 
   @Prop([MusicCover])
-  covers: MusicCover[];
+  covers?: MusicCover[];
 
   @Prop()
-  container: string;
+  container?: string;
 
   @Prop()
-  codec: string;
+  codec?: string;
 
   @Prop()
-  lossless: boolean;
+  lossless?: boolean;
 
   @Prop()
-  numberOfChannels: number;
+  numberOfChannels?: number;
 
   @Prop()
-  bitsPerSample: number;
+  bitsPerSample?: number;
 
   @Prop()
-  sampleRate: number;
+  sampleRate?: number;
 
   @Prop()
-  duration: number;
+  duration?: number;
 
   @Prop()
-  bitrate: number;
+  bitrate?: number;
 }
 
 export const MusicSchema = SchemaFactory.createForClass(Music);

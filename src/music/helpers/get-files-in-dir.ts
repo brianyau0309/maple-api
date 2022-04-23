@@ -9,7 +9,7 @@ export const scan = async (directoryName: string, results = []) => {
     if (fileStat.isDirectory()) {
       await scan(fullPath, results);
     } else {
-      results.push(fullPath);
+      results.push(`/${fullPath}`);
     }
   }
   return results;

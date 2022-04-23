@@ -1,8 +1,12 @@
 {
     "cSpell.words": [
+        "apikey",
         "Fastify",
+        "headerapikey",
         "nestjs",
+        "prebuild",
         "upsert",
+        "upserted",
         "uuidv"
     ]
 }

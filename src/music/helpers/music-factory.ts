@@ -1,6 +1,6 @@
 import { IAudioMetadata, IPicture } from 'music-metadata';
 import { basename, extname } from 'path';
-import { CreateMusicDto } from '../dto/upsert-music.dto';
+import { Music } from '../schemas/music.schema';
 import { MusicCover } from '../schemas/music-cover.schema';
 import { resizeCover } from './image-process';
 
@@ -17,10 +17,10 @@ const musicCoverFromMetadata = async (
   return covers;
 };
 
-export const musicDtoFromMetadata = async (
+export const musicFromMetadata = async (
   path: string,
   metadata: IAudioMetadata,
-): Promise<CreateMusicDto> => ({
+): Promise<Music> => ({
   path,
   filename: basename(path),
   ext: extname(path).replace('.', '') || undefined,
