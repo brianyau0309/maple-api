@@ -2,6 +2,7 @@ import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as morgan from 'morgan';
 import { AppModule } from './app/app.module';
 
 async function bootstrap() {
@@ -11,6 +12,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api');
   app.enableVersioning({ type: VersioningType.URI });
+  app.use(morgan('common'));
 
   // Config
   const configService = app.get(ConfigService);

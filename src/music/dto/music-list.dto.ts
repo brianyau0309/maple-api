@@ -1,29 +1,32 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsInt, IsOptional } from 'class-validator';
 import { Music } from '../schemas/music.schema';
 
 export class AllMusicDto {
-  @IsNumber()
+  @Transform(({ value }) => parseInt(value), { toClassOnly: true })
+  @IsInt()
   @IsOptional()
   @ApiProperty({ required: false })
   limit?: number;
 
-  @IsNumber()
+  @Transform(({ value }) => parseInt(value), { toClassOnly: true })
+  @IsInt()
   @IsOptional()
   @ApiProperty({ required: false })
   skip?: number;
 }
 
 export class MusicListMeta {
-  @IsNumber()
+  @IsInt()
   @ApiProperty()
   limit: number;
 
-  @IsNumber()
+  @IsInt()
   @ApiProperty()
   skip: number;
 
-  @IsNumber()
+  @IsInt()
   @ApiProperty()
   total: number;
 }

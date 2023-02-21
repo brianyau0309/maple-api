@@ -1,12 +1,13 @@
 {
-    "cSpell.words": [
-        "apikey",
-        "Fastify",
-        "headerapikey",
-        "nestjs",
-        "prebuild",
-        "upsert",
-        "upserted",
-        "uuidv"
-    ]
+  "cSpell.words": [
+    "apikey",
+    "Fastify",
+    "headerapikey",
+    "nestjs",
+    "prebuild",
+    "Streamable",
+    "upsert",
+    "upserted",
+    "uuidv"
+  ]
 }

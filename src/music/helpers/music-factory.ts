@@ -10,9 +10,13 @@ const musicCoverFromMetadata = async (
   if (pictures === undefined) return;
   const covers = [];
   for (const picture of pictures) {
-    const { type, format, data } = picture;
-    const resizedBuffer = await resizeCover(data);
-    covers.push({ type, format, data: resizedBuffer.toString('base64') });
+    const { type, data } = picture;
+    const webpBuffer = await resizeCover(data);
+    covers.push({
+      type,
+      format: 'image/webp',
+      data: webpBuffer.toString('base64'),
+    });
   }
   return covers;
 };
