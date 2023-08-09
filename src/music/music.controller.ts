@@ -62,19 +62,33 @@ export class MusicController {
       limit,
       skip,
     );
-    return { data: musicDocs.map(musicFromDoc), meta };
+    return {
+      data: musicDocs.map((doc) => {
+        const music = musicFromDoc(doc);
+        return {
+          ...music,
+          url: `/download/${music.musicId}.${music.codec.toLowerCase()}`,
+        };
+      }),
+      meta,
+    };
   }
 
-  @Get(':musicId')
-  @ApiOperation({ summary: 'Music detail' })
-  @ApiOkResponse({ description: 'Music detail', type: Music })
-  @ApiNotFoundResponse({ description: 'Music not found' })
-  @ApiBadRequestResponse({ description: 'musicId must be uuid' })
-  async findOne(@Param() params: MusicDetailParams): Promise<Music> {
-    const { musicId } = params;
-    const filterQuery = { musicId };
-    const musicDoc = await this.musicService.findOne(filterQuery);
-    return musicFromDoc(musicDoc);
+  @Post('/sync')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Sync Music' })
+  @ApiOkResponse({ description: 'Music synced', type: SyncMusicResponse })
+  @ApiBadRequestResponse({ description: 'Invalid input' })
+  sync(@Body() body: SyncMusicDto) {
+    const { method } = body;
+    return this.musicService.sync(method);
+  }
+
+  @Delete('/clean')
+  @ApiOperation({ summary: 'Clean Music' })
+  @ApiOkResponse({ description: 'Music cleaned', type: CleanMusicResponse })
+  clean() {
+    return this.musicService.clean();
   }
 
   @Get('/download/:musicId.:ext')
@@ -92,6 +106,7 @@ export class MusicController {
     // const range = headers.range;
     const filterQuery = { musicId };
     const musicDoc = await this.musicService.findOne(filterQuery);
+    console.log(musicDoc.path);
     const fileState = await stat(join(process.cwd(), musicDoc.path));
     const contentType = lookup(musicDoc.filename);
     const fileExt = musicDoc.ext ?? extension(musicDoc.filename);
@@ -137,20 +152,21 @@ export class MusicController {
     throw new InternalServerErrorException('Music file process error.');
   }
 
-  @Post('/sync')
-  @HttpCode(200)
-  @ApiOperation({ summary: 'Sync Music' })
-  @ApiOkResponse({ description: 'Music synced', type: SyncMusicResponse })
-  @ApiBadRequestResponse({ description: 'Invalid input' })
-  sync(@Body() body: SyncMusicDto) {
-    const { method } = body;
-    return this.musicService.sync(method);
-  }
-
-  @Delete('/clean')
-  @ApiOperation({ summary: 'Clean Music' })
-  @ApiOkResponse({ description: 'Music cleaned', type: CleanMusicResponse })
-  clean() {
-    return this.musicService.clean();
+  @Get(':musicId')
+  @ApiOperation({ summary: 'Music detail' })
+  @ApiOkResponse({ description: 'Music detail', type: Music })
+  @ApiNotFoundResponse({ description: 'Music not found' })
+  @ApiBadRequestResponse({ description: 'musicId must be uuid' })
+  async findOne(
+    @Param() params: MusicDetailParams,
+  ): Promise<Music & { url: string }> {
+    const { musicId } = params;
+    const filterQuery = { musicId };
+    const musicDoc = await this.musicService.findOne(filterQuery);
+    const music = musicFromDoc(musicDoc);
+    return {
+      ...music,
+      url: `/download/${music.musicId}.${music.codec.toLowerCase()}`,
+    };
   }
 }

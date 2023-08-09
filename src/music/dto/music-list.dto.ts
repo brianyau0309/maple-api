@@ -33,7 +33,7 @@ export class MusicListMeta {
 
 export class MusicListResponse {
   @ApiProperty({ description: 'Music list', type: Music, isArray: true })
-  data: Music[];
+  data: (Music & { url: string })[];
 
   @ApiProperty({ description: 'Metadata' })
   meta: MusicListMeta;
