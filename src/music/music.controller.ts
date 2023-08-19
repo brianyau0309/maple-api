@@ -175,7 +175,7 @@ export class MusicController {
 
   @Get(':musicId/thumbnail')
   @ApiOperation({ summary: 'Music Thumbnail' })
-  @ApiOkResponse({ description: 'Music detail', type: Blob })
+  @ApiOkResponse({ description: 'Music detail' })
   @ApiNotFoundResponse({ description: 'Music not found' })
   @ApiBadRequestResponse({ description: 'musicId must be uuid' })
   async findThumbnail(
