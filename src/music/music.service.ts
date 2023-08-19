@@ -22,11 +22,19 @@ export class MusicService {
     limit: number,
     skip: number,
   ) {
-    const musicDocs = await this.musicModal
-      .find(userFilterQuery)
-      .limit(limit)
-      .skip(skip);
-    const total = await this.musicModal.count();
+    const [musicDocs, total] = await Promise.all([
+      userFilterQuery.$text
+        ? this.musicModal
+            .find(userFilterQuery, { covers: 0, score: { $meta: 'textScore' } })
+            .sort({ score: { $meta: 'textScore' } })
+            .limit(limit)
+            .skip(skip)
+        : this.musicModal
+            .find(userFilterQuery, { covers: 0 })
+            .limit(limit)
+            .skip(skip),
+      this.musicModal.count(userFilterQuery),
+    ]);
     return {
       musicDocs,
       meta: { limit, skip, total },

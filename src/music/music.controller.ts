@@ -18,6 +18,7 @@ import {
   ValidationPipe,
   InternalServerErrorException,
   NotFoundException,
+  Response,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -39,7 +40,7 @@ import { CleanMusicResponse } from './dto/clean-music.dto';
 import { musicFromDoc } from './helpers/music-factory';
 import { MusicService } from './music.service';
 import { Music } from './schemas/music.schema';
-// import { Response as ExpressResponse } from 'express';
+import { Response as ExpressResponse } from 'express';
 
 @ApiTags('Music')
 @ApiHeader({ name: 'x-api-key', required: true })
@@ -55,19 +56,21 @@ export class MusicController {
   @ApiBadRequestResponse({ description: 'Invalid input' })
   @UsePipes(new ValidationPipe({ transform: true }))
   async findAll(@Query() query: AllMusicDto = {}) {
-    const { limit = 10, skip = 0 } = query;
-    const filterQuery = {};
+    const { limit = 10, skip = 0, search } = query;
+    const filterQuery = search ? { $text: { $search: search } } : {};
     const { musicDocs, meta } = await this.musicService.findAll(
       filterQuery,
       limit,
       skip,
     );
+    console.log(JSON.stringify(musicDocs, null, 2));
     return {
       data: musicDocs.map((doc) => {
         const music = musicFromDoc(doc);
         return {
           ...music,
           url: `/download/${music.musicId}.${music.codec.toLowerCase()}`,
+          thumbnail: `/${music.musicId}/thumbnail`,
         };
       }),
       meta,
@@ -168,5 +171,23 @@ export class MusicController {
       ...music,
       url: `/download/${music.musicId}.${music.codec.toLowerCase()}`,
     };
+  }
+
+  @Get(':musicId/thumbnail')
+  @ApiOperation({ summary: 'Music Thumbnail' })
+  @ApiOkResponse({ description: 'Music detail', type: Blob })
+  @ApiNotFoundResponse({ description: 'Music not found' })
+  @ApiBadRequestResponse({ description: 'musicId must be uuid' })
+  async findThumbnail(
+    @Response() res: ExpressResponse,
+    @Param() params: MusicDetailParams,
+  ) {
+    const { musicId } = params;
+    const filterQuery = { musicId };
+    const musicDoc = await this.musicService.findOne(filterQuery);
+    const img = musicDoc.covers?.[0].data;
+    if (!img) throw new NotFoundException('Thumbnail Not Found');
+    res.setHeader('Content-Type', 'image/jpeg');
+    return res.send(Buffer.from(img, 'base64'));
   }
 }

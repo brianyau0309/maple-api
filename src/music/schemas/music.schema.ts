@@ -74,3 +74,10 @@ export class Music {
 }
 
 export const MusicSchema = SchemaFactory.createForClass(Music);
+MusicSchema.index({
+  path: 'text',
+  filename: 'text',
+  title: 'text',
+  artist: 'text',
+  album: 'text',
+});

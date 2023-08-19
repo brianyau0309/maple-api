@@ -15,6 +15,10 @@ export class AllMusicDto {
   @IsOptional()
   @ApiProperty({ required: false })
   skip?: number;
+
+  @IsOptional()
+  @ApiProperty({ required: false })
+  search?: string;
 }
 
 export class MusicListMeta {
