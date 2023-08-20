@@ -69,7 +69,7 @@ export class MusicController {
         const music = musicFromDoc(doc);
         return {
           ...music,
-          url: `/download/${music.musicId}.${music.codec.toLowerCase()}`,
+          url: `/download/${music.musicId}.${music.ext.toLowerCase()}`,
           thumbnail: `/${music.musicId}/thumbnail`,
         };
       }),
@@ -169,7 +169,7 @@ export class MusicController {
     const music = musicFromDoc(musicDoc);
     return {
       ...music,
-      url: `/download/${music.musicId}.${music.codec.toLowerCase()}`,
+      url: `/download/${music.musicId}.${music.ext.toLowerCase()}`,
     };
   }
 
