@@ -11,11 +11,15 @@ const musicCoverFromMetadata = async (
   const covers = [];
   for (const picture of pictures) {
     const { type, data } = picture;
-    const webpBuffer = await resizeCover(data);
+    const [webpBuffer, webpThumbnailBuffer] = await Promise.all([
+      resizeCover(data, 300),
+      resizeCover(data, 80),
+    ]);
     covers.push({
       type,
       format: 'image/webp',
       data: webpBuffer.toString('base64'),
+      thumbnail: webpThumbnailBuffer.toString('base64'),
     });
   }
   return covers;

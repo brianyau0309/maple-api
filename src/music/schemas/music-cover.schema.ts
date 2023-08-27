@@ -17,6 +17,10 @@ export class MusicCover {
   @Prop({ required: true })
   @ApiProperty()
   data: string;
+
+  @Prop({ required: true })
+  @ApiProperty()
+  thumbnail: string;
 }
 
 export const MusicCoverSchema = SchemaFactory.createForClass(MusicCover);

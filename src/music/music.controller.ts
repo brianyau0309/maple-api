@@ -173,10 +173,29 @@ export class MusicController {
     };
   }
 
+  @Get(':musicId/cover')
+  @ApiOperation({ summary: 'Music Cover' })
+  @ApiOkResponse({ description: 'Music Cover' })
+  @ApiNotFoundResponse({ description: 'Cover not found' })
+  @ApiBadRequestResponse({ description: 'musicId must be uuid' })
+  async findCover(
+    @Response() res: ExpressResponse,
+    @Param() params: MusicDetailParams,
+  ) {
+    const { musicId } = params;
+    const filterQuery = { musicId };
+    const musicDoc = await this.musicService.findOne(filterQuery);
+    const img = musicDoc.covers?.[0].thumbnail;
+    const imgFormat = musicDoc.covers?.[0].format;
+    if (!img || !imgFormat) throw new NotFoundException('Cover Not Found');
+    res.setHeader('Content-Type', imgFormat);
+    return res.send(Buffer.from(img, 'base64'));
+  }
+
   @Get(':musicId/thumbnail')
   @ApiOperation({ summary: 'Music Thumbnail' })
-  @ApiOkResponse({ description: 'Music detail' })
-  @ApiNotFoundResponse({ description: 'Music not found' })
+  @ApiOkResponse({ description: 'Music Thumbnail' })
+  @ApiNotFoundResponse({ description: 'Thumbnail not found' })
   @ApiBadRequestResponse({ description: 'musicId must be uuid' })
   async findThumbnail(
     @Response() res: ExpressResponse,
@@ -185,9 +204,10 @@ export class MusicController {
     const { musicId } = params;
     const filterQuery = { musicId };
     const musicDoc = await this.musicService.findOne(filterQuery);
-    const img = musicDoc.covers?.[0].data;
-    if (!img) throw new NotFoundException('Thumbnail Not Found');
-    res.setHeader('Content-Type', 'image/jpeg');
+    const img = musicDoc.covers?.[0].thumbnail;
+    const imgFormat = musicDoc.covers?.[0].format;
+    if (!img || !imgFormat) throw new NotFoundException('Thumbnail Not Found');
+    res.setHeader('Content-Type', imgFormat);
     return res.send(Buffer.from(img, 'base64'));
   }
 }
