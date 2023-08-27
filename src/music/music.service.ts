@@ -72,6 +72,7 @@ export class MusicService {
       try {
         const metadata = await parseFile(join(process.cwd(), path));
         const dto = await musicFromMetadata(path, metadata);
+        console.log('Finish parseFile: ', path);
         return {
           updateOne: {
             filter: { path },

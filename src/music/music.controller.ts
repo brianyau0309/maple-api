@@ -63,7 +63,6 @@ export class MusicController {
       limit,
       skip,
     );
-    console.log(JSON.stringify(musicDocs, null, 2));
     return {
       data: musicDocs.map((doc) => {
         const music = musicFromDoc(doc);
@@ -185,7 +184,7 @@ export class MusicController {
     const { musicId } = params;
     const filterQuery = { musicId };
     const musicDoc = await this.musicService.findOne(filterQuery);
-    const img = musicDoc.covers?.[0].thumbnail;
+    const img = musicDoc.covers?.[0]?.data;
     const imgFormat = musicDoc.covers?.[0].format;
     if (!img || !imgFormat) throw new NotFoundException('Cover Not Found');
     res.setHeader('Content-Type', imgFormat);
@@ -204,8 +203,8 @@ export class MusicController {
     const { musicId } = params;
     const filterQuery = { musicId };
     const musicDoc = await this.musicService.findOne(filterQuery);
-    const img = musicDoc.covers?.[0].thumbnail;
-    const imgFormat = musicDoc.covers?.[0].format;
+    const img = musicDoc.covers?.[0]?.thumbnail;
+    const imgFormat = musicDoc.covers?.[0]?.format;
     if (!img || !imgFormat) throw new NotFoundException('Thumbnail Not Found');
     res.setHeader('Content-Type', imgFormat);
     return res.send(Buffer.from(img, 'base64'));
