@@ -43,9 +43,9 @@ import { Music } from './schemas/music.schema';
 import { Response as ExpressResponse } from 'express';
 
 @ApiTags('Music')
-// @ApiHeader({ name: 'x-api-key', required: true })
+@ApiHeader({ name: 'x-api-key', required: true })
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-// @UseGuards(AuthGuard('api-key'))
+@UseGuards(AuthGuard('api-key'))
 @Controller({ path: 'music', version: '1' })
 export class MusicController {
   constructor(private readonly musicService: MusicService) {}
