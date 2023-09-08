@@ -43,9 +43,9 @@ import { Music } from './schemas/music.schema';
 import { Response as ExpressResponse } from 'express';
 
 @ApiTags('Music')
-@ApiHeader({ name: 'x-api-key', required: true })
+// @ApiHeader({ name: 'x-api-key', required: true })
 @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-@UseGuards(AuthGuard('api-key'))
+// @UseGuards(AuthGuard('api-key'))
 @Controller({ path: 'music', version: '1' })
 export class MusicController {
   constructor(private readonly musicService: MusicService) {}
@@ -66,11 +66,7 @@ export class MusicController {
     return {
       data: musicDocs.map((doc) => {
         const music = musicFromDoc(doc);
-        return {
-          ...music,
-          url: `/download/${music.musicId}.${music.ext.toLowerCase()}`,
-          thumbnail: `/${music.musicId}/thumbnail`,
-        };
+        return music;
       }),
       meta,
     };
@@ -159,17 +155,12 @@ export class MusicController {
   @ApiOkResponse({ description: 'Music detail', type: Music })
   @ApiNotFoundResponse({ description: 'Music not found' })
   @ApiBadRequestResponse({ description: 'musicId must be uuid' })
-  async findOne(
-    @Param() params: MusicDetailParams,
-  ): Promise<Music & { url: string }> {
+  async findOne(@Param() params: MusicDetailParams): Promise<Music> {
     const { musicId } = params;
     const filterQuery = { musicId };
     const musicDoc = await this.musicService.findOne(filterQuery);
     const music = musicFromDoc(musicDoc);
-    return {
-      ...music,
-      url: `/download/${music.musicId}.${music.ext.toLowerCase()}`,
-    };
+    return music;
   }
 
   @Get(':musicId/cover')

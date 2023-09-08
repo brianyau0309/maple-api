@@ -32,8 +32,14 @@ export const musicFromMetadata = async (
   path,
   filename: basename(path),
   ext: extname(path).replace('.', '') || undefined,
-  title: metadata.common.title,
-  artist: metadata.common.artist,
+  title:
+    metadata.common.title && metadata.common.title !== 'untitled'
+      ? metadata.common.title
+      : basename(path),
+  artist:
+    metadata.common.artist && metadata.common.artist !== 'Unknown'
+      ? metadata.common.artist
+      : undefined,
   album: metadata.common.album,
   covers: await musicCoverFromMetadata(metadata.common.picture),
   container: metadata.format.container,
@@ -46,21 +52,25 @@ export const musicFromMetadata = async (
   bitrate: metadata.format.bitrate,
 });
 
-export const musicFromDoc = (doc: MusicDocument): Music => ({
-  musicId: doc.musicId,
-  path: doc.path,
-  filename: doc.filename,
-  ext: doc.ext,
-  title: doc.title,
-  artist: doc.artist,
-  album: doc.album,
-  covers: doc.covers,
-  container: doc.container,
-  codec: doc.codec,
-  lossless: doc.lossless,
-  numberOfChannels: doc.numberOfChannels,
-  bitsPerSample: doc.bitsPerSample,
-  sampleRate: doc.sampleRate,
-  duration: doc.duration,
-  bitrate: doc.bitrate,
-});
+export const musicFromDoc = (doc: MusicDocument): Music =>
+  ({
+    id: String(doc._id),
+    musicId: doc.musicId,
+    path: doc.path,
+    filename: doc.filename,
+    ext: doc.ext,
+    title: doc.title,
+    artist: doc.artist,
+    album: doc.album,
+    covers: doc.covers,
+    container: doc.container,
+    codec: doc.codec,
+    lossless: doc.lossless,
+    numberOfChannels: doc.numberOfChannels,
+    bitsPerSample: doc.bitsPerSample,
+    sampleRate: doc.sampleRate,
+    duration: doc.duration,
+    bitrate: doc.bitrate,
+    url: `/download/${doc.musicId}.${doc.ext.toLowerCase()}`,
+    thumbnail: `/${doc.musicId}/thumbnail`,
+  } as Music);
