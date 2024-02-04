@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID } from 'class-validator';
+import { IsString, IsUUID } from 'class-validator';
 
 export class MusicDetailParams {
   @IsUUID()
@@ -8,4 +8,10 @@ export class MusicDetailParams {
 
   @ApiProperty()
   ext: string;
+}
+
+export class MusicDownloadHeaders {
+  @IsString()
+  @ApiProperty({ required: false })
+  range?: string;
 }

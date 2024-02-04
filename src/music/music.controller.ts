@@ -19,6 +19,8 @@ import {
   InternalServerErrorException,
   NotFoundException,
   Response,
+  HttpStatus,
+  Headers,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -32,6 +34,7 @@ import {
 import {
   AllMusicDto,
   MusicDetailParams,
+  MusicDownloadHeaders,
   MusicListResponse,
   SyncMusicDto,
   SyncMusicResponse,
@@ -96,12 +99,12 @@ export class MusicController {
   @ApiBadRequestResponse({ description: 'musicId must be uuid' })
   async download(
     @Param() params: MusicDetailParams,
-    // @Headers() headers,
-    // @Response({ passthrough: true }) res: ExpressResponse,
+    @Headers() headers: MusicDownloadHeaders,
+    @Response({ passthrough: true }) res: ExpressResponse,
   ): Promise<any> {
     const { musicId, ext } = params;
     console.log(musicId, ext);
-    // const range = headers.range;
+    const range = headers.range;
     const filterQuery = { musicId };
     const musicDoc = await this.musicService.findOne(filterQuery);
     console.log(musicDoc.path);
@@ -113,38 +116,38 @@ export class MusicController {
 
     if (fileExt && contentType) {
       const filename = `${musicDoc.musicId}.${fileExt}`;
-      // if (range) {
-      //   const rangeBytes = range.split('=')[1].split('-');
-      //   const start = Number(rangeBytes[0]);
-      //   const end = Math.min(Number(rangeBytes[1]), fileState.size - 1);
-      //   const contentLength = end - start + 1;
-      //   const resHeaders = {
-      //     'Accept-Ranges': 'bytes',
-      //     'Content-Range': `bytes ${start}-${end}/${fileState.size}`,
-      //     'Content-Disposition': `attachment; filename="${filename}"`,
-      //     'Content-Length': contentLength,
-      //     'Content-Type': contentType,
-      //   };
-      //   try {
-      //     res.writeHead(HttpStatus.PARTIAL_CONTENT, resHeaders);
-      //     const stream = createReadStream(join(process.cwd(), musicDoc.path), {
-      //       start,
-      //       end,
-      //     });
+      if (range) {
+        const rangeBytes = range.split('=')[1].split('-');
+        const start = Number(rangeBytes[0]);
+        const end = Math.min(Number(rangeBytes[1]), fileState.size - 1);
+        const contentLength = end - start + 1;
+        const resHeaders = {
+          'Accept-Ranges': 'bytes',
+          'Content-Range': `bytes ${start}-${end}/${fileState.size}`,
+          'Content-Disposition': `attachment; filename="${filename}"`,
+          'Content-Length': contentLength,
+          'Content-Type': contentType,
+        };
+        try {
+          res.writeHead(HttpStatus.PARTIAL_CONTENT, resHeaders);
+          const stream = createReadStream(join(process.cwd(), musicDoc.path), {
+            start,
+            end,
+          });
 
-      //     return new StreamableFile(stream);
-      //   } catch (err) {
-      //     console.log(err && err.message);
-      //     return;
-      //   }
-      // } else {
-      const stream = createReadStream(join(process.cwd(), musicDoc.path));
-      return new StreamableFile(stream, {
-        disposition: `attachment; filename="${filename}"`,
-        length: fileState.size,
-        type: contentType,
-      });
-      // }
+          return new StreamableFile(stream);
+        } catch (err) {
+          console.log(err && err.message);
+          return;
+        }
+      } else {
+        const stream = createReadStream(join(process.cwd(), musicDoc.path));
+        return new StreamableFile(stream, {
+          disposition: `attachment; filename="${filename}"`,
+          length: fileState.size,
+          type: contentType,
+        });
+      }
     }
 
     throw new InternalServerErrorException('Music file process error.');
